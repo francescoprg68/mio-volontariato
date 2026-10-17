@@ -10,7 +10,7 @@ import streamlit.components.v1 as components
 cartella_script = os.path.dirname(os.path.abspath(__file__))
 
 # Percorso completo e sicuro del file Excel principale
-DB_FILE = os.path.join(cartella_script, "servizi anc dal 2023.xlsx")
+DB_FILE = os.path.join(cartella_script, "servizi anc dal 2003.xlsx")
 
 # --- CREAZIONE AUTOMATICA DELLE CARTELLE PER I DOCUMENTI E FOTO ---
 anni_cartelle = [2025, 2026, 2027, 2028, "DOCUMENTI VARI", "FOTO"]
