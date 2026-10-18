@@ -448,9 +448,9 @@ if not df_servizi.empty:
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # --- TABELLA RIEPILOGATIVA E GRAFICO PER ANNO (RISERVATO ADMIN) ---
-        if is_admin:
-            with st.expander("📈 Visualizza / Nascondi Tabella Riepilogativa e Grafico per Anno", expanded=True):
+        # --- PRIMO EXPANDER: TABELLA RIEPILOGATIVA E GRAFICO PER ANNO ---
+        with st.expander("📈 Visualizza / Nascondi Tabella Riepilogativa e Grafico per Anno", expanded=False):
+            if is_admin:
                 st.markdown("### 📈 Andamento e Riepilogo per Anno")
                 riepilogo_anni = (
                     df_servizi.groupby("Anno")
@@ -514,15 +514,14 @@ if not df_servizi.empty:
                     st.markdown("##### Grafico Numero Servizi per Anno")
                     svg_code = genera_svg_grafico(riepilogo_anni)
                     components.html(svg_code, height=270)
-        else:
-            st.markdown("---")
-            st.info("🔒 *I dettagli completi di tutti i servizi sono riservati. Inserisci la password nella barra laterale per sbloccarli.*")
-            
+            else:
+                st.info("🔒 *I dettagli completi di tutti i servizi sono riservati. Inserisci la password nella barra laterale per sbloccarli.*")
+
         st.markdown("---")
         
-        # --- TABELLA TUTTI I SERVIZI IN UN EXPANDER (RISERVATA ADMIN) ---
-        if is_admin:
-            with st.expander("📄 Visualizza / Nascondi Tutti i Servizi Registrati"):
+        # --- SECONDO EXPANDER: TUTTI I SERVIZI REGISTRATI ---
+        with st.expander("📄 Visualizza / Nascondi Tutti i Servizi Registrati", expanded=False):
+            if is_admin:
                 df_mostra_tutti = (
                     df_servizi.drop(columns=["Anno", "Secondi_Totali"])
                     .sort_values(by="Data", ascending=False)
@@ -534,6 +533,8 @@ if not df_servizi.empty:
                     use_container_width=True,
                     hide_index=True,
                 )
+            else:
+                st.info("🔒 *I dettagli completi di tutti i servizi sono riservati. Inserisci la password nella barra laterale per sbloccarli.*")
             
     # --- VISTA GESTIONE ARCHIVIO DOCUMENTI E FOTO ---
     elif st.session_state["vista_corrente"].startswith("ARCHIVIO_"):
