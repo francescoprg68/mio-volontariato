@@ -212,13 +212,31 @@ try:
 except:
     st.sidebar.info("💡 Inserisci 'logo.png' nella cartella per il logo.")
     
-# --- GESTIONE PASSWORD AMMINISTRATORE ---
+# --- GESTIONE PASSWORD AMMINISTRATORE & LOGOUT ---
 PASSWORD_CORRETTA = "Carabinieri2026"
 st.sidebar.markdown("### 🔐 Area Riservata")
-password_inserita = st.sidebar.text_input("Password Amministratore", type="password", key="password_admin")
-is_admin = (password_inserita == PASSWORD_CORRETTA)
+
+# Inizializza lo stato di login se non esiste
+if "is_logged_in" not in st.session_state:
+    st.session_state["is_logged_in"] = False
+
+# Se non è loggato, mostra il campo password
+if not st.session_state["is_logged_in"]:
+    password_inserita = st.sidebar.text_input("Password Amministratore", type="password", key="password_admin_input")
+    if password_inserita == PASSWORD_CORRETTA:
+        st.session_state["is_logged_in"] = True
+        st.rerun()
+    elif password_inserita != "":
+        st.sidebar.error("Password errata!")
+
+is_admin = st.session_state["is_logged_in"]
+
 if is_admin:
-    st.sidebar.success("Accesso Admin Effettuato!")    
+    st.sidebar.success("Accesso Admin Effettuato!")
+    if st.sidebar.button("🚪 Logout", use_container_width=True):
+        st.session_state["is_logged_in"] = False
+        st.rerun()
+
 st.sidebar.markdown("### 🎨 Personalizzazione Sfondo")
 luminosita_sfondo = st.sidebar.slider(
     "Luminosità / Velatura Sfondo",
@@ -516,7 +534,6 @@ if not df_servizi.empty:
                     components.html(svg_code, height=270)
             else:
                 st.info("🔒 *I dettagli completi di tutti i servizi sono riservati. Inserisci la password nella barra laterale per sbloccarli.*")
-
         st.markdown("---")
         
         # --- SECONDO EXPANDER: TUTTI I SERVIZI REGISTRATI ---
