@@ -219,7 +219,6 @@ password_inserita = st.sidebar.text_input("Password Amministratore", type="passw
 is_admin = (password_inserita == PASSWORD_CORRETTA)
 if is_admin:
     st.sidebar.success("Accesso Admin Effettuato!")    
-
 st.sidebar.markdown("### 🎨 Personalizzazione Sfondo")
 luminosita_sfondo = st.sidebar.slider(
     "Luminosità / Velatura Sfondo",
@@ -237,11 +236,9 @@ for formato in ["sfondo.jpg", "sfondo.jpeg", "sfondo.png", "sfondo.webp"]:
         break
 if not sfondo_applicato:
     imposta_sfondo(os.path.join(cartella_script, "inesistente.jpg"), luminosita_sfondo)
-
 if st.sidebar.button("⬆ Torna all'inizio", use_container_width=True):
     st.session_state["vista_corrente"] = "Panoramica Generale"
     st.rerun()
-
 st.sidebar.divider()
 
 # --- GESTIONE FILE EXCEL (RISERVATA A ADMIN) ---
@@ -255,7 +252,6 @@ if is_admin:
 else:
     st.sidebar.info("🔒 Inserisci la password per sbloccare il caricamento file.")
     df_servizi = carica_dati(DB_FILE)
-
 st.sidebar.divider()
 
 # --- INSERISCI NUOVO SERVIZIO (RISERVATO A ADMIN) ---
@@ -452,51 +448,51 @@ if not df_servizi.empty:
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # --- TABELLA RIEPILOGATIVA E GRAFICO IN UN EXPANDER ---
-        with st.expander("📈 Visualizza / Nascondi Tabella Riepilogativa e Grafico per Anno", expanded=True):
-            st.markdown("### 📈 Andamento e Riepilogo per Anno")
-            riepilogo_anni = (
-                df_servizi.groupby("Anno")
-                .agg(
-                    Servizi=("Data", "count"),
-                    Secondi_Totali=("Secondi_Totali", "sum"),
-                )
-                .reset_index()
-                .sort_values(by="Anno", ascending=True)
-            )
-            if not riepilogo_anni.empty:
-                max_servizi_row = riepilogo_anni.loc[
-                    riepilogo_anni["Servizi"].idxmax()
-                ]
-                min_servizi_row = riepilogo_anni.loc[
-                    riepilogo_anni["Servizi"].idxmin()
-                ]
-                col_minmax1, col_minmax2 = st.columns(2)
-                with col_minmax1:
-                    st.metric(
-                        "🏆 Anno con più Servizi",
-                        f"{int(max_servizi_row['Servizi'])} servizi",
-                        f"Anno {int(max_servizi_row['Anno'])}",
+        # --- TABELLA RIEPILOGATIVA E GRAFICO PER ANNO (RISERVATO ADMIN) ---
+        if is_admin:
+            with st.expander("📈 Visualizza / Nascondi Tabella Riepilogativa e Grafico per Anno", expanded=True):
+                st.markdown("### 📈 Andamento e Riepilogo per Anno")
+                riepilogo_anni = (
+                    df_servizi.groupby("Anno")
+                    .agg(
+                        Servizi=("Data", "count"),
+                        Secondi_Totali=("Secondi_Totali", "sum"),
                     )
-                with col_minmax2:
-                    st.metric(
-                        "📌 Anno con meno Servizi",
-                        f"{int(min_servizi_row['Servizi'])} servizi",
-                        f"Anno {int(min_servizi_row['Anno'])}",
-                    )
-            col_tab, col_graf = st.columns([1, 1.5])
-            with col_tab:
-                st.markdown(
-                    "##### Tabella Riepilogativa (Clicca l'anno per i dettagli)"
+                    .reset_index()
+                    .sort_values(by="Anno", ascending=True)
                 )
-                for _, row in riepilogo_anni.sort_values(
-                    by="Anno", ascending=False
-                ).iterrows():
-                    anno_val = int(row["Anno"])
-                    ore_str = formato_hh_mm_ss(row['Secondi_Totali'])
-                    col_btn, col_txt1, col_txt2 = st.columns([1.5, 1, 1])
-                    with col_btn:
-                        if is_admin:
+                if not riepilogo_anni.empty:
+                    max_servizi_row = riepilogo_anni.loc[
+                        riepilogo_anni["Servizi"].idxmax()
+                    ]
+                    min_servizi_row = riepilogo_anni.loc[
+                        riepilogo_anni["Servizi"].idxmin()
+                    ]
+                    col_minmax1, col_minmax2 = st.columns(2)
+                    with col_minmax1:
+                        st.metric(
+                            "🏆 Anno con più Servizi",
+                            f"{int(max_servizi_row['Servizi'])} servizi",
+                            f"Anno {int(max_servizi_row['Anno'])}",
+                        )
+                    with col_minmax2:
+                        st.metric(
+                            "📌 Anno con meno Servizi",
+                            f"{int(min_servizi_row['Servizi'])} servizi",
+                            f"Anno {int(min_servizi_row['Anno'])}",
+                        )
+                col_tab, col_graf = st.columns([1, 1.5])
+                with col_tab:
+                    st.markdown(
+                        "##### Tabella Riepilogativa (Clicca l'anno per i dettagli)"
+                    )
+                    for _, row in riepilogo_anni.sort_values(
+                        by="Anno", ascending=False
+                    ).iterrows():
+                        anno_val = int(row["Anno"])
+                        ore_str = formato_hh_mm_ss(row['Secondi_Totali'])
+                        col_btn, col_txt1, col_txt2 = st.columns([1.5, 1, 1])
+                        with col_btn:
                             if st.button(
                                 f"🔍 Anno {anno_val}",
                                 key=f"btn_anno_tab_{anno_val}",
@@ -504,23 +500,24 @@ if not df_servizi.empty:
                             ):
                                 st.session_state["vista_corrente"] = f"ANNO_{anno_val}"
                                 st.rerun()
-                        else:
-                            st.markdown(f"<p style='padding-top: 5px; font-weight: bold;'>Anno {anno_val}</p>", unsafe_allow_html=True)
-                            
-                    with col_txt1:
-                        st.markdown(
-                            f"<p style='padding-top: 5px; color: #f2f061; font-size: 18px; font-weight: 500;'>{int(row['Servizi'])} serv.</p>",
-                            unsafe_allow_html=True,
-                        )
-                    with col_txt2:
-                        st.markdown(
-                            f"<p style='padding-top: 5px; color: #f2f061; font-size: 18px; font-weight: 500;'>{ore_str}</p>",
-                            unsafe_allow_html=True,
-                        )
-            with col_graf:
-                st.markdown("##### Grafico Numero Servizi per Anno")
-                svg_code = genera_svg_grafico(riepilogo_anni)
-                components.html(svg_code, height=270)
+                        with col_txt1:
+                            st.markdown(
+                                f"<p style='padding-top: 5px; color: #f2f061; font-size: 18px; font-weight: 500;'>{int(row['Servizi'])} serv.</p>",
+                                unsafe_allow_html=True,
+                            )
+                        with col_txt2:
+                            st.markdown(
+                                f"<p style='padding-top: 5px; color: #f2f061; font-size: 18px; font-weight: 500;'>{ore_str}</p>",
+                                unsafe_allow_html=True,
+                            )
+                with col_graf:
+                    st.markdown("##### Grafico Numero Servizi per Anno")
+                    svg_code = genera_svg_grafico(riepilogo_anni)
+                    components.html(svg_code, height=270)
+        else:
+            st.markdown("---")
+            st.info("🔒 *I dettagli completi di tutti i servizi sono riservati. Inserisci la password nella barra laterale per sbloccarli.*")
+            
         st.markdown("---")
         
         # --- TABELLA TUTTI I SERVIZI IN UN EXPANDER (RISERVATA ADMIN) ---
@@ -537,8 +534,6 @@ if not df_servizi.empty:
                     use_container_width=True,
                     hide_index=True,
                 )
-        else:
-            st.info("🔒 *I dettagli completi di tutti i servizi sono riservati. Inserisci la password nella barra laterale per sbloccarli.*")
             
     # --- VISTA GESTIONE ARCHIVIO DOCUMENTI E FOTO ---
     elif st.session_state["vista_corrente"].startswith("ARCHIVIO_"):
