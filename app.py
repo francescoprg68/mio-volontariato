@@ -213,7 +213,11 @@ except:
     st.sidebar.info("💡 Inserisci 'logo.png' nella cartella per il logo.")
     
 # --- GESTIONE PASSWORD AMMINISTRATORE & LOGOUT ---
-PASSWORD_CORRETTA = "Carabinieri2026"
+# --- GESTIONE PASSWORD SICURA ---
+try:
+    PASSWORD_CORRETTA = st.secrets["PASSWORD_CORRETTA"]
+except:
+    PASSWORD_CORRETTA = "Carabinieri2026"  # Password di riserva per i test in locale sul tuo PC
 st.sidebar.markdown("### 🔐 Area Riservata")
 
 # Inizializza lo stato di login se non esiste
